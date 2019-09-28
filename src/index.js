@@ -1,7 +1,18 @@
+
 const $app = document.getElementById('app');
 const $observe = document.getElementById('observe');
 const API = 'https://rickandmortyapi.com/api/character/';
 const NEXT_FETCH_KEY = 'next_fetch'
+
+const State = {
+  firstTime: true,
+  get isFirstTime(){
+    return this.firstTime
+  },
+  set isFirstTime(val){
+    this.firstTime = val
+  }
+}
 
 const getData = api => {
   return fetch(api)
@@ -28,7 +39,10 @@ const parseResults = (results) => {
 // Cómo decía el problema, cambie la función LoadData a Async/Await
 const loadData = async () => {
   const nextFetch = localStorage.getItem(NEXT_FETCH_KEY)
-  const url = nextFetch ? nextFetch : API
+  const url = nextFetch && !State.isFirstTime ? nextFetch : API
+  State.isFirstTime = false
+  console.log(nextFetch)
+
   try {
     const response = await getData(url);
     if ('localStorage' in window) {
