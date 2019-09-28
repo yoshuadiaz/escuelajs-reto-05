@@ -39,26 +39,35 @@ const parseResults = (results) => {
 // Cómo decía el problema, cambie la función LoadData a Async/Await
 const loadData = async () => {
   const nextFetch = localStorage.getItem(NEXT_FETCH_KEY)
-  const url = nextFetch && !State.isFirstTime ? nextFetch : API
-  State.isFirstTime = false
-  console.log(nextFetch)
-
-  try {
-    const response = await getData(url);
-    if ('localStorage' in window) {
-      localStorage.setItem('next_fetch', response.info.next)
-    } else {
-      throw new Error('Error on try to set localStorage')
+  const url = State.isFirstTime ? API : nextFetch
+  if(!State.isFirstTime && nextFetch === '') {
+    intersectionObserver.unobserve($observe)
+    const newItem = document.createElement('section');
+    newItem.innerHTML = 'Ya no hay personajes...'
+    $app.appendChild(newItem);
+  } else {
+    try {
+      const response = await getData(url);
+      if ('localStorage' in window) {
+        localStorage.setItem('next_fetch', response.info.next)
+      } else {
+        throw new Error('Error on try to set localStorage')
+      }
+      parseResults(response.results)
+    } catch (error) {
+      throw new Error(`Error on loadData: ${error.message}`)
     }
-    parseResults(response.results)
-  } catch (error) {
-    throw new Error(`Error on loadData: ${error.message}`)
   }
+  State.isFirstTime = false
 }
 
 const intersectionObserver = new IntersectionObserver(entries => {
   if (entries[0].isIntersecting) {
-    loadData();
+    try {
+      loadData();
+    } catch (error) {
+      console.log('OH NO')
+    }
   }
 }, {
   rootMargin: '0px 0px 100% 0px',
