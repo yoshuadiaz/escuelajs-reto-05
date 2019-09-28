@@ -7,6 +7,11 @@ const getData = api => {
     .then(response => response.json())
     .then(response => {
       const characters = response.results;
+      if ('localStorage' in window) {
+        localStorage.setItem('next_fetch', response.info.next)
+      } else {
+        throw new Error('Error on try to set localStorage')
+      }
       let output = characters.map(character => {
         return `
       <article class="Card">
